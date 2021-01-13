@@ -3,7 +3,6 @@ import registryKovan from '@balancer-labs/assets/generated/dex/registry.kovan.js
 import { getSupportedChainName } from '../provider/connectors';
 
 function getContracts(chainName: string) {
-    // this is for the ETH Mainnet, not NEAR
     if (chainName === 'mainnet') {
         return {
             bFactory: '0x9424B1412450D0f8Fc2255FAf6046b98213B76Bd',
@@ -13,11 +12,9 @@ function getContracts(chainName: string) {
             sorMulticall: '0x514053aCEC7177e277B947b1EBb5C08AB4C4580E',
         };
     }
-    // TODO: proxy/weth/multicall/sorMulticall addresses for NEAR
-    // currently, the bFactory address is from my deployment
-    if (chainName === 'betanet') {
+    if (chainName === 'kovan') {
         return {
-            bFactory: '0xe6886e188752aF58056b682866E1cc264Be110F8',
+            bFactory: '0x8f7F78080219d4066A8036ccD30D588B416a40DB',
             proxy: '0x2641f150669739986CDa3ED6860DeD44BC3Cda5d',
             weth: '0xd0A1E359811322d97991E03f863a0C30C2cF029C',
             multicall: '0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A',
@@ -29,10 +26,6 @@ function getContracts(chainName: string) {
 
 function getAssets(chainName: string) {
     if (chainName === 'mainnet') {
-        return registry;
-    }
-    // TODO: find NEAR betanet registry!
-    if (chainName === 'betanet') {
         return registry;
     }
     if (chainName === 'kovan') {
