@@ -64,7 +64,7 @@ const App = () => {
                 <BuildVersion>
                     BUILD ID:{' '}
                     <BuildLink
-                        href={`https://github.com/vacuumlabs/balancer-exchange/tree/${buildId}`}
+                        href={`https://github.com/balancer-labs/balancer-exchange/tree/${buildId}`}
                         target="_blank"
                     >
                         {buildId.substring(0, 12)}
