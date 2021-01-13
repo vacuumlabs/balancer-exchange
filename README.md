@@ -2,12 +2,6 @@
 
 ## Development
 
--   Install Dependencies
-
-    ```
-    yarn install
-    ```
-
 -   Environment Config
 
     -   Copy .env.example -> .env
