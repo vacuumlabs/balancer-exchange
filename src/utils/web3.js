@@ -1,9 +1,6 @@
 // Libraries
-import Web3 from 'near-web3-provider';
+import Web3 from 'web3';
 
-// TODO: Check that all of this is compatible with near-web3-provider
-// as well as making it compliant with NEAR token standards instead of EIP1102 mentioned below
-// does NEAR have similar functions to window.ethereum ?
 class Web3Extended extends Web3 {
     stop = () => {
         // this.reset(true);
