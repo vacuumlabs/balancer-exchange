@@ -12,6 +12,18 @@ import Dropdown from '../../assets/images/dropdown.svg';
 import Dropup from '../../assets/images/dropup.svg';
 
 import Button from '../Button';
+import * as nearlib from 'nearlib';
+
+const nearConfig = {
+    nodeUrl: 'https://rpc.betanet.near.org/',
+    deps: {
+        keyStore: new nearlib.keyStores.BrowserLocalStorageKeyStore(),
+    },
+    networkId: 'betanet',
+    evmAccountId: 'evm',
+    walletUrl: 'https://wallet.betanet.near.org',
+    explorerUrl: 'https://explorer.betanet.near.org',
+};
 
 const WarningIcon = styled.img`
     width: 22px;
@@ -100,6 +112,7 @@ const Wallet = observer(() => {
         root: { dropdownStore, transactionStore, providerStore },
     } = useStores();
 
+    //const account = walletAccount.getAccountId();
     const account = providerStore.providerStatus.account;
     const activeChainId = providerStore.providerStatus.activeChainId;
     const active = providerStore.providerStatus.active;
@@ -116,6 +129,12 @@ const Wallet = observer(() => {
     );
 
     const toggleWalletDropdown = async () => {
+        // Possibly move the initNear() code from Provider.ts here
+        //const near = await nearlib.connect(nearConfig);
+        //const walletAccount = new nearlib.WalletAccount(near, undefined); // why does this take 2 args??
+        //const account = await walletAccount.requestSignIn('evm', 'Balancer Exchange', undefined, undefined);
+        //const accountId = walletAccount.getAccountId();
+        //console.log(`[DEBUG] account id ok? ` + JSON.stringify(accountId));
         dropdownStore.toggleWalletDropdown();
     };
 
@@ -161,7 +180,7 @@ const Wallet = observer(() => {
             return (
                 <Button
                     onClick={toggleWalletDropdown}
-                    buttonText="Connect Wallet"
+                    buttonText="Login with Near"
                     active={true}
                 />
             );
