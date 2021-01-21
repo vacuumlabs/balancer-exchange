@@ -33,31 +33,44 @@ export const supportedChainId = Number(
 );
 
 export const getSupportedChainId = () => {
+    console.log('[DEBUG] supported chain id: ' + supportedChainId);
     return supportedChainId;
 };
 
 export const getSupportedChainName = () => {
+    console.log(
+        '[DEBUG] supported chain name: ' + chainNameById[supportedChainId]
+    );
     return chainNameById[supportedChainId];
 };
 
 export const chainNameById = {
     '1': 'mainnet',
+    '2': 'betanet',
     '3': 'ropsten',
     '42': 'kovan',
 };
 
 export const isChainIdSupported = (chainId: number): boolean => {
+    console.log(
+        '[DEBUG] isChainIdSupported? chainId = ' +
+            chainId +
+            ' supportedChainId: ' +
+            supportedChainId
+    );
     return supportedChainId === chainId;
 };
 
 const RPC_URLS: { [chainId: number]: string } = {
     1: process.env.REACT_APP_RPC_URL_1 as string,
+    2: process.env.REACT_APP_RPC_URL_2 as string,
     3: process.env.REACT_APP_RPC_URL_3 as string,
     42: process.env.REACT_APP_RPC_URL_42 as string,
 };
 
 export const SUBGRAPH_URLS: { [chainId: number]: string } = {
     1: process.env.REACT_APP_SUBGRAPH_URL_1 as string,
+    2: process.env.REACT_APP_SUBGRAPH_URL_2 as string,
     3: process.env.REACT_APP_SUBGRAPH_URL_3 as string,
     42: process.env.REACT_APP_SUBGRAPH_URL_42 as string,
 };

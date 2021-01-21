@@ -6,6 +6,67 @@ import { ActionResponse, sendAction } from './actions/actions';
 import { web3Window as window } from 'provider/Web3Window';
 import { backupUrls, supportedChainId, web3Modal } from 'provider/connectors';
 
+// NEAR imports
+import Web3 from 'web3';
+import { NearProvider, nearWeb3Extensions } from 'near-web3-provider';
+import * as nearlib from 'nearlib';
+
+// config object to hold near network info, we should hold this somewhere else, eventually
+// important note: keystore must be part of the deps object, or the code breaks!
+const nearConfig = {
+    nodeUrl: 'https://rpc.betanet.near.org/',
+    deps: {
+        keyStore: new nearlib.keyStores.BrowserLocalStorageKeyStore(),
+    },
+    networkId: 'betanet',
+    evmAccountId: 'evm',
+    walletUrl: 'https://wallet.betanet.near.org',
+    explorerUrl: 'https://explorer.betanet.near.org',
+};
+
+// Function to initialise a connection to NEAR
+async function initNear() {
+    const near = await nearlib.connect(nearConfig);
+    console.log(`[DEBUG] nearConfig object: ` + JSON.stringify(nearConfig));
+    console.log(`[DEBUG] near object: ` + JSON.stringify(near));
+
+    const walletAccount = new nearlib.WalletAccount(near, undefined); // why does this take 2 args??
+    console.log(
+        `[DEBUG] near walletAccount signed in? (should be false) ` +
+            walletAccount.isSignedIn()
+    );
+
+    const account = await walletAccount.requestSignIn(
+        'evm',
+        'Balancer Exchange',
+        undefined,
+        undefined
+    ); // i don't know why but this needs to have the last two args specified
+    console.log(
+        `[DEBUG] near walletAccount signed in? (should be true) ` +
+            walletAccount.isSignedIn()
+    );
+
+    const accountId = walletAccount.getAccountId();
+    console.log(`[DEBUG] account id ok? ` + JSON.stringify(accountId));
+
+    let np = new NearProvider({
+        nodeUrl: nearConfig.nodeUrl,
+        keyStore: nearConfig.deps.keyStore,
+        masterAccountId: accountId,
+        networkId: nearConfig.networkId,
+        evmAccountId: nearConfig.evmAccountId,
+        walletUrl: nearConfig.walletUrl,
+        explorerUrl: nearConfig.explorerUrl,
+        isReadOnly: false,
+    });
+    console.log(`[DEBUG] NearProvider: ` + JSON.stringify(np));
+
+    return np;
+    //return new NearProvider(nearConfig.nodeUrl, nearConfig.deps.keyStore, accountId, nearConfig.networkId, 'evm');
+}
+// END
+
 export enum ContractTypes {
     BPool = 'BPool',
     BFactory = 'BFactory',
@@ -53,7 +114,17 @@ export interface ProviderStatus {
     activeProvider: any;
     error: Error;
 }
-
+/*const nearConfig = {
+    nodeUrl: 'https://rpc.betanet.near.org/',
+    deps: {
+        keyStore: new nearlib.keyStores.BrowserLocalStorageKeyStore()
+    },
+    networkId: 'betanet',
+    evmAccountId: 'evm',
+    walletUrl: 'https://wallet.betanet.near.org',
+    explorerUrl: 'https://explorer.betanet.near.org'
+};
+*/
 export default class ProviderStore {
     @observable chainData: ChainData;
     @observable providerStatus: ProviderStatus;
@@ -226,6 +297,10 @@ export default class ProviderStore {
     }
 
     @action async loadProvider(provider) {
+        console.log(
+            `[DEBUG] Attempted loadProvider call with param: ` +
+                JSON.stringify(provider)
+        );
         try {
             // remove any old listeners
             if (
@@ -297,7 +372,19 @@ export default class ProviderStore {
         }
     }
 
+    // There's some NEAR Code here!
+    // I commented out  a bunch of code that loaded a backup provider and made it load using the near provider
+    // That I've declared above
     @action async loadWeb3(provider = null) {
+        console.log(
+            `[DEBUG] Attempted loadWeb3 call with param: ` +
+                JSON.stringify(provider)
+        );
+        //console.log("window.ethereum: " + JSON.stringify(window.ethereum));
+        //console.log("this.providerStatus.injectedLoaded:" + this.providerStatus.injectedLoaded);
+        //console.log("this.providerStatus.injectedChainId" + this.providerStatus.injectedChainId);
+        //console.log(`Just the entire providerStatus: `, this.providerStatus);
+        /*
         /*
         Handles loading web3 provider.
         Injected web3 loaded and active if chain Id matches.
@@ -321,14 +408,31 @@ export default class ProviderStore {
                 this.providerStatus
             );
             try {
+                // The provider status object isn't properly set, I haven't looked into what it needs
+                // to know, how it needs it passed and where it uses it.
+                console.log('Trying to create near web3 provider!');
+                /*window.nearConfig = {
+                    networkId: 'betanet',
+                    nodeUrl: 'https://rpc.betanet.near.org/',
+                    contractName: 'balancer-core',
+                    walletUrl: 'https://wallet.betanet.near.org',
+                    helperUrl: 'https://helper.betanet.near.org'
+                };*/
+                const NearProvider = await initNear();
+                /*
                 let web3 = new ethers.providers.JsonRpcProvider(
                     backupUrls[supportedChainId]
                 );
-                let network = await web3.getNetwork();
+                */
+                const web3 = new Web3(NearProvider);
+                //let network = await web3.getNetwork(); This line was here and the near provider didn't seem to provide it, check what it does
+                // and try figure out if we can delete it
                 this.providerStatus.injectedActive = false;
                 this.providerStatus.backUpLoaded = true;
-                this.providerStatus.account = null;
-                this.providerStatus.activeChainId = network.chainId;
+                this.providerStatus.account = 'memoriesadrift.betanet'; // FIXME: this should probably take the account from initNear()
+                // I'm not sure, though; worth investigating
+                // We should save that account id in initNear and pass it here probably
+                this.providerStatus.activeChainId = supportedChainId; // I changed this line, previously it took the network var defined above and called network.chainId
                 this.providerStatus.backUpWeb3 = web3;
                 this.providerStatus.library = web3;
                 this.providerStatus.activeProvider = 'backup'; //backupUrls[supportedChainId];
